@@ -1,0 +1,24 @@
+ul li {
+  margin: 0 0 1.4em 0;
+}
+
+ul.plain li:before {
+  content: '';
+}
+
+article.bigger {
+  p, ul {
+    font-size: 45px;
+    line-height: 49px;
+    letter-spacing: 1px;
+  }
+}
+
+article.sparse > * {
+  margin: 20px 0;
+}
+
+.thank-you-slide {
+  background-color: #2e2934 !important;
+  color: white;
+}
