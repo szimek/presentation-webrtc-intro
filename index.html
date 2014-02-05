@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WebRTC</title>
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+  <!--This one seems to work all the time, but really small on ipad-->
+  <!--<meta name="viewport" content="initial-scale=0.4">-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" media="all" href="theme/css/default.css">
+  <link rel="stylesheet" media="all" href="theme/css/meetjs.css">
+  <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css">
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+  <script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+</head>
+<body style="opacity: 0">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-39365077-5', 'szimek.github.io');
+  ga('send', 'pageview');
+</script>
+
+<slides class="layout-widescreen">
+
+  <slide class="fill nobackground" style="background-image: url(images/meetjs_logo.png)"></slide>
+
+  <slide class="title-slide segue nobackground">
+    <aside class="gdbar"><img src="images/meetjs_bar.png" alt="meetjs logo"></aside>
+    <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+    <hgroup class="auto-fadein">
+      <h1 data-config-title><!-- populated from slide_config.json --></h1>
+      <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+      <p data-config-presenter><!-- populated from slide_config.json --></p>
+    </hgroup>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h1>Real-Time Communication</h1>
+      <h3>in a browser</h3>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h1>Demos!</h1>
+    </article>
+  </slide>
+
+  <slide class="fill">
+    <hgroup>
+      <h2>Video conference</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <iframe width="800" height:"450" style="width: 800px; height: 450px" src="//www.youtube.com/embed/MsAWR_rJ5n8?controls=1&modestbranding=&showinfo=0" frameborder="0" allowfullscreen></iframe>
+    </article>
+  </slide>
+
+  <slide class="fill">
+    <hgroup>
+      <h2>Screen sharing</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <iframe width="800" height:"450" style="width: 800px; height: 450px" src="//www.youtube.com/embed/tD0QtBUZsF4?controls=1&modestbranding=&showinfo=0" frameborder="0" allowfullscreen></iframe>
+    </article>
+  </slide>
+
+  <slide class="fill">
+    <hgroup>
+      <h2>Mutliplayer games (TCP and UDP)</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <iframe width="800" height:"450" style="width: 800px; height: 450px" src="//www.youtube.com/embed/nqihx_K-Y-o?controls=1&modestbranding=&showinfo=0" frameborder="0" allowfullscreen></iframe>
+    </article>
+  </slide>
+
+  <slide class="fill">
+    <hgroup>
+      <h2>File sharing #1</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <iframe width="800" height:"450" style="width: 800px; height: 450px" src="https://www.sharefest.me/" frameborder="0" allowfullscreen></iframe>
+    </article>
+  </slide>
+
+  <slide class="fill">
+    <hgroup>
+      <h2>File sharing #2</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <h1>FileDrop</h1>
+      <h2>OS X AirDrop clone in HTML5</h2>
+    </article>
+  </slide>
+
+  <slide class="fill">
+    <article class="flexbox vcenter">
+      <img src="images/filedrop.png">
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h2>So what is WebRTC exactly?</h2>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h1>3 APIs</h1>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter bigger">
+      <ul class="plain">
+        <li>MediaStream (AKA getUserMedia)</li>
+        <li>RTCPeerConnection</li>
+        <li>RTCDataChannel</li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>MediaStream</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Represents a stream of audio and/or video</li>
+        <li>Can contain multiple 'tracks'</li>
+        <li>Obtain a MediaStream with navigator.getUserMedia()</li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>MediaStream</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <img style="width:100%" src="images/mediaStream.png">
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>MediaStream</h2>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        var constraints = {video: true};
+
+        function successCallback(stream) {
+          var video = document.querySelector("video");
+          video.src = window.URL.createObjectURL(stream);
+        }
+
+        function errorCallback(error) {
+          console.log("navigator.getUserMedia error: ", error);
+        }
+
+        <b>navigator.getUserMedia(constraints, successCallback, errorCallback);</b>
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>MediaStream</h2>
+      <h3>Constraints</h3>
+    </hgroup>
+    <article style="position: relative; top: -25px;">
+      <ul>
+        <li>Controls the contents of the MediaStream</li>
+        <li>Media type, resolution, frame rate</li>
+      </ul>
+      <pre class="prettyprint" data-lang="javascript">
+        {
+          "mandatory": {
+            "width": { "min": 480 }
+          },
+          "optional": [
+            { "width": { "min": 720 } },
+            { "frameRate": 60 },
+            { "facingMode": "user" }
+          ]
+        }
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>MediaStream</h2>
+      <h3>Screen capturing</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        var constraints = {
+          video: {
+            mandatory: {
+              <b>chromeMediaSource: 'screen'</b>
+            }
+          }
+        };
+
+        navigator.webkitGetUserMedia(constraints, gotStream);
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>RTCPeerConnection</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Peer to peer communication</li>
+        <li>Codec handling</li>
+        <li>Signal processing</li>
+        <li>Security</li>
+        <li>Bandwidth management</li>
+        <li>...</li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>RTCPeerConnection</h2>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        pc = new RTCPeerConnection(configuration);
+        pc.onaddstream = gotRemoteStream;
+        pc.addStream(localStream); // from getUserMedia
+        pc.createOffer(gotOffer);
+
+        function gotOffer(desc) {
+          pc.setLocalDescription(desc);
+          sendOffer(desc);
+        }
+
+        function gotAnswer(desc) {
+          pc.setRemoteDescription(desc);
+        }
+
+        function gotRemoteStream(e) {
+          attachMediaStream(remoteVideo, e.stream);
+        }
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>RTCDataChannel</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Same API as WebSockets</li>
+        <li>Ultra-low latency</li>
+        <li>Unreliable or reliable (similar to UDP and TCP)</li>
+        <li>Secure</li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>RTCPeerConnection</h2>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        pc = new RTCPeerConnection(configuration);
+
+        <b>pc.ondatachannel = function (event) {</b>
+          receiveChannel = event.channel;
+          <b>receiveChannel.onmessage = function (event) {</b>
+            document.querySelector("div#receive").innerHTML = event.data;
+          };
+        };
+
+        <b>sendChannel = pc.createDataChannel("sendDataChannel", {reliable: false});</b>
+
+        document.querySelector("button#send").onclick = function () {
+          var data = document.querySelector("textarea#send").value;
+          <b>sendChannel.send(data);</b>
+        };
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h1>Peer to peer, but...</h1>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h1>you need 3 servers</h1>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter sparse">
+      <h2>signaling</h2>
+      <h2>STUN</h2>
+      <h2>TURN</h2>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h3>WebRTC needs four types of server-side functionality</h3>
+    </hgroup>
+    <article>
+      <ul>
+        <li>User discovery and communication</li>
+        <li>Signaling</li>
+        <li>NAT/firewall traversal</li>
+        <li>Relay servers in case peer-to-peer communication fails</li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Signaling</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Need to exchange 2 types of objects:</li>
+        <ul class="tight">
+          <li><b>Session Description</b> - what codecs and resolutions can be handled by my browser and the browser it wants to communicate with?</li>
+          <li><b>ICE candidates</b> - what's my computer's IP address and port?</li>
+        </ul>
+        <li>WebRTC does not specify any protocol for that - you can use anything</li>
+        <ul class="tight">
+          <li>WebSockets</li>
+          <li>AJAX</li>
+          <li>...</li>
+        </ul>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Signaling</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <img src="images/jsep.png" alt="JSEP architecture diagram">
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>RTCSessionDescription</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li><b>SDP</b> - Session Description protocol</li>
+        <li>offer / answer</li>
+      </ul>
+      <pre class="prettyprint" data-lang="javascript">
+        pc.createOffer(gotOffer);
+
+        function gotOffer(desc) {
+          pc.setLocalDescription(desc);
+          sendOffer(desc);
+        }
+
+        function gotAnswer(desc) {
+          pc.setRemoteDescription(desc);
+        }
+      </pre>
+    </article>
+  </slide>
+
+  <!-- TODO: Session description SDP offer answer -->
+
+  <slide>
+    <article class="flexbox vcenter sparse">
+      <h1>STUN</h1>
+      <h1>TURN</h1>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>An ideal world</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <img src="images/noSTUNorTURN.png" alt="Data pathways between peers if there were no NATs or firewalls" style="position: relative; top: -30px">
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>The real world</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <img src="images/firewall.png" alt="Data pathways showing firewalls" style="position: relative; top: -26px">
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>STUN</h2>
+      <h3>Session Traversal Utilities for NAT</h3>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Tell me what my public IP address is</li>
+        <li>Simple server, cheap to run</li>
+        <li><b>Data flows peer-to-peer</b></li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>STUN</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <img src="images/stun.png" alt="Data pathways between peers using STUN" style="position: relative; top: -50px">
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>TURN</h2>
+      <h3>Traversal Using Relays around NAT</h3>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Cloud fallback if peer-to-peer communication fails</li>
+        <li>Ensures that call works in almost all environments</li>
+        <li><b>Data flows through a server, uses server bandwidth</b></li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>TURN</h2>
+    </hgroup>
+    <article class="flexbox vcenter">
+      <img src="images/STUNandTURN.png" alt="Data pathways between peers using TURN" style="left: 1px; position: relative; top: -47px">
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>ICE</h2>
+      <h3>Interactive Connectivity Establishment</h3>
+    </hgroup>
+    <article>
+     <ul>
+      <li><a href="http://en.wikipedia.org/wiki/Interactive_Connectivity_Establishment" title="Wikipedia ICE article">ICE</a>: a framework for connecting peers</li>
+      <li>Tries to find the best path for each call</li>
+      <li>Vast majority of calls can use STUN (webrtcstats.com):
+      </li>
+    </ul>
+    <img src="images/icestats.png" alt="Data pathways between peers using TURN" style="position: relative; left: 25%; top: -40px;">
+   </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter sparse">
+      <h1>SDP</h1>
+      <h1>ICE</h1>
+      <h1>STUN</h1>
+      <h1>TURN</h1>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #1: Create connection</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        <b>pc = new RTCPeerConnection(configuration);</b>
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #1: Create offer (SDP)</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        pc = new RTCPeerConnection(configuration);
+        <b>pc.createOffer(gotOffer)</b>
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #1: Set generated offer as local description and send it to other peers</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        pc = new RTCPeerConnection(configuration);
+        pc.createOffer(gotOffer)
+
+        function gotOffer(description) {
+          <b>pc.setLocalDescription(description);</b>
+          <b>sendOffer(description);</b>
+        }
+        <b></b>
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #1: Setting local description generates local ICE candidates</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        function gotOffer(description) {
+          <b>pc.setLocalDescription(description);</b>
+          sendOffer(description);
+        }
+
+        <b>pc.onicecandidate = function (event) {
+          sendCandidate(event.candidate);
+        }</b>
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #2: Receive an answer (SDP) from other peer and set it as remote description</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        function gotAnswer(desc) {
+          pc.setRemoteDescription(desc);
+        }
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #2: Setting remote description generates local ICE candidates</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        pc.onicecandidate = function (event) {
+          sendCandidate(event.candidate);
+        }
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>Step by step example</h2>
+      <h3>Peer #1 and #2: Process received ICE candidates</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint" data-lang="javascript">
+        function gotIceCandidate (message) {
+          pc.addIceCandidate(new RTCIceCandidate({
+            sdpMLineIndex: message.label,
+            candidate: message.candidate
+          }));
+        }
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <article class="flexbox vcenter">
+      <h1>Done :)</h1>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>JavaScript frameworks</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li>Video chat:</li>
+        <ul>
+          <li><a href="https://github.com/henrikjoreteg/SimpleWebRTC" title="SimpleWebRTC github repository">SimpleWebRTC</a></li>
+          <li><a href="https://github.com/priologic/easyrtc" title="easyRTC github repository">easyRTC</a></li>
+          <li><a href="https://github.com/webRTC/webRTC.io" title="webRTC.io github repository">webRTC.io</a></li>
+        </ul>
+        <li>Peer-to-peer data:</li>
+        <ul>
+          <li><a href="http://peerjs.com/" title="PeerJS site">PeerJS</a></li>
+        </ul>
+      </ul>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>SimpleWebRTC</h2>
+      <h3>Easy peer-to-peer video and audio</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint">
+        var webrtc = new WebRTC({
+          localVideoEl: 'localVideo',
+          remoteVideosEl: 'remoteVideos',
+          autoRequestMedia: true
+        });
+
+        webrtc.on('readyToCall', function () {
+          webrtc.joinRoom('My room name');
+        });
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>PeerJS</h2>
+      <h3>Easy peer-to-peer data</h3>
+    </hgroup>
+    <article>
+      <pre class="prettyprint">
+        var peer = new Peer('someid');
+        peer.on('connection', function(conn) {
+          conn.on('data', function(data){
+            // Will print 'hi!'
+            console.log(data);
+          });
+        });
+
+        // Connecting peer
+        var peer = new Peer('anotherid');
+        var conn = peer.connect('someid');
+        conn.on('open', function(){
+          conn.send('hi!');
+        });
+      </pre>
+    </article>
+  </slide>
+
+  <slide>
+    <hgroup>
+      <h2>More information</h2>
+    </hgroup>
+    <article>
+      <ul>
+        <li><a href="http://www.youtube.com/watch?v=p2HzZkd2A40">Video: Real-time communication with WebRTC: Google I/O 2013</a></li>
+        <li>HTML5 Rocks!</li>
+        <ul>
+          <li><a href="http://www.html5rocks.com/en/tutorials/getusermedia/intro/">Capturing Audio & Video in HTML5</a></li>
+          <li><a href="http://www.html5rocks.com/en/tutorials/webrtc/basics/">Getting Started with WebRTC</a></li>
+          <li><a href="http://www.html5rocks.com/en/tutorials/webrtc/infrastructure/">WebRTC in the real world: STUN, TURN and signaling</a></li>
+          <li><a href="http://www.html5rocks.com/en/search?q=webrtc">Updates</a></li>
+        </ul>
+        <li>Tutorials and code samples: <a href="https://www.webrtc-experiment.com/">WebRTC Experiments & Demos</a></li>
+        <li>Book: <a href="http://www.webrtcbook.com/">webrtcbook.com</a></li>
+      </ul>
+    </article>
+  </slide>
+
+  <slide class="thank-you-slide segue nobackground">
+    <article class="flexbox vleft auto-fadein">
+      <h2>Thank You!</h2>
+    </article>
+    <p class="auto-fadein" data-config-contact>
+      <!-- populated from slide_config.json -->
+    </p>
+  </slide>
+
+  <slide class="fill nobackground" style="background-image: url(images/meetjs_logo.png)"></slide>
+
+  <!-- don't remove this slide! -->
+  <slide class="backdrop"></slide>
+</slides>
+</body>
+</html>
